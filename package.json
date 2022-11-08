@@ -1,0 +1,36 @@
+{
+  "name": "cdk-boilerplate",
+  "version": "0.1.0",
+  "bin": {
+    "cdk-boilerplate": "infra/app.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk",
+    "cdk-synth-dev": "cdk synth -c config=dev --profile aws_profile",
+    "cdk-synth-qa": "cdk synth -c config=qa --profile aws_profile",
+    "cdk-synth-prod": "cdk synth -c config=prod --profile aws_profile",
+    "cdk-diff-dev": "npm run build && cdk diff \"*\" -c config=dev --profile aws_profile",
+    "cdk-diff-qa": "npm run build && cdk diff \"*\" -c config=qa --profile aws_profile",
+    "cdk-diff-prod": "npm run build && cdk diff \"*\" -c config=prod --profile aws_profile",
+    "cdk-deploy-dev": "npm run build && cdk deploy \"*\" -c config=dev --profile aws_profile --require-approval=never  --progress=events",
+    "cdk-deploy-qa": "npm run build && cdk deploy \"*\" -c config=qa --profile aws_profile --require-approval=never  --progress=events",
+    "cdk-deploy-prod": "npm run build && cdk deploy \"*\" -c config=prod --profile aws_profile --require-approval=never  --progress=events",
+    "cdk-destroy-dev": "cdk destroy --all -c config=dev --profile aws_profile",
+    "cdk-destroy-qa": "cdk destroy --all -c config=qa --profile aws_profile",
+    "cdk-destroy-prod": "cdk destroy --all -c config=prod --profile aws_profile"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.24",
+    "@types/node": "^10.17.27",
+    "ts-node": "^9.1.1",
+    "typescript": "~3.9.7"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.50.0",
+    "constructs": "^10.1.153",
+    "source-map-support": "^0.5.21"
+  }
+}
