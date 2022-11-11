@@ -1,12 +1,12 @@
-exports.handler = async (event) => {
-  const { DynamoDBClient, PutCommand } = require("@aws-sdk/client-dynamodb");
+exports.handler = async () => {
+  const { DynamoDBClient, PutCommand } = require('@aws-sdk/client-dynamodb');
   const crypto = require('crypto');
 
-  const dynamodb = new DynamoDBClient({ region: 'eu-central-1' });
+  const dynamodb = new DynamoDBClient();
   const LOOP_INDEX = 10;
   const ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
 
-  for (let index = 0; index < LOOP_INDEX; index++) {
+  for (let index = 0; index < LOOP_INDEX; index += 1) {
     const putCommand = new PutCommand({
       TableName: process.env.DYNAMODB_TABLE,
       Item: {
