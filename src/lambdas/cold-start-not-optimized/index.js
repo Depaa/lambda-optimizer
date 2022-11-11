@@ -1,4 +1,4 @@
-exports.handler = async (event) => {
+exports.handler = async () => {
   const { DynamoDB } = require('aws-sdk');
   const crypto = require('crypto');
 
@@ -6,7 +6,7 @@ exports.handler = async (event) => {
   const LOOP_INDEX = 10;
   const ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
 
-  for (let index = 0; index < LOOP_INDEX; index++) {
+  for (let index = 0; index < LOOP_INDEX; index += 1) {
     await dynamodb.put({
       TableName: process.env.DYNAMODB_TABLE,
       Item: {
