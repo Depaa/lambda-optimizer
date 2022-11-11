@@ -30,11 +30,11 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 ### optimized ❌
 ### not-optimized ❌
 * ✅ Use AWS_NODEJS_CONNECTION_REUSE_ENABLED to 1 to make the SDK reuse connections by default. JS_V3 is enabled by default https://aws.amazon.com/blogs/developer/http-keep-alive-is-on-by-default-in-modular-aws-sdk-for-javascript/
-* Reuse the container, imports and declaration using container invocation, not within the handler. Hence initialize outside the handler. You can also use cache within the container (keep in mind the limits).
-* ? Multiprocessing nodeJS in Lambda and calculate vCPU https://www.sentiatechblog.com/aws-re-invent-2020-day-3-optimizing-lambda-cost-with-multi-threading
-* ? Specify region when initializing aws resources
-* ? Don’t log too much, only log when necessary
-* execute code in parallel 
+* ✅ Reuse the container, imports and declaration using container invocation, not within the handler. Hence initialize outside the handler. You can also use cache within the container (keep in mind the limits).
+* ❓ Multiprocessing nodeJS in Lambda and calculate vCPU https://www.sentiatechblog.com/aws-re-invent-2020-day-3-optimizing-lambda-cost-with-multi-threading
+* ❓/✅ Specify region when initializing aws resources
+* ❓ Don’t log too much, only log when necessary
+* ✅ execute code in parallel 
 
 
 ## 3. Resource
