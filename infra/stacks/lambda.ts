@@ -1,12 +1,14 @@
 import { App, Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Runtime, Function, Code, Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Effect, IRole, Policy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { Charset, NodejsFunction, OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { BuildConfig } from '../lib/common/config.interface';
 import { name } from '../lib/common/utils';
 import { join } from 'path';
+import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 
 interface LambdaStackProps extends StackProps {
+  dynamoDBTableName: string;
   dynamoDBTableArn: string;
 }
 
@@ -25,21 +27,21 @@ export class LambdaStack extends Stack {
     super(scope, id, props);
 
     const baseEnv = {
-      DYNAMODB_TABLE: props.dynamoDBTableArn,
+      DYNAMODB_TABLE: props.dynamoDBTableName,
     };
 
     const lambdaRoleDynamoDB = this.createLambdaRole(name(`${id}`), props, buildConfig);
 
     this.createFunction(name(`${id}-cold-start-not-optimized`), 'cold-start-not-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.COLD_START_NOT_OPTIMIZED, baseEnv);
-    this.createOptimizedFunction(name(`${id}-cold-start-optimized`), 'cold-start-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.COLD_START_OPTIMIZED, baseEnv);
-    this.createOptimizedFunction(name(`${id}-code-not-optimized`), 'code-not-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.CODE_NOT_OPTIMIZED, baseEnv);
-    this.createOptimizedFunction(name(`${id}-code-optimized`), 'code-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.CODE_OPTIMIZED, baseEnv);
-    
+    this.createBundleOptimizedFunction(name(`${id}-cold-start-optimized`), 'cold-start-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.COLD_START_OPTIMIZED, baseEnv);
+    this.createBundleOptimizedFunction(name(`${id}-code-not-optimized`), 'code-not-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.CODE_NOT_OPTIMIZED, baseEnv);
+    this.createBundleOptimizedFunction(name(`${id}-code-optimized`), 'code-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.CODE_OPTIMIZED, baseEnv);
+
     this.createFunction(name(`${id}-not-optimized`), 'not-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.NOT_OPTIMIZED, baseEnv);
-    this.createOptimizedFunction(name(`${id}-optimized`), 'optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.OPTIMIZED, baseEnv);
+    this.createBundleOptimizedFunction(name(`${id}-optimized`), 'optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.OPTIMIZED, baseEnv);
   }
 
-  private createOptimizedFunction = (name: string, filename: string, role: IRole, type: LAMBDA_TYPE, environment?: { [key: string]: string; }): Function => {
+  private createBundleOptimizedFunction = (name: string, filename: string, role: IRole, type: LAMBDA_TYPE, environment?: { [key: string]: string; }): Function => {
     return new NodejsFunction(this, name,
       {
         memorySize: type === LAMBDA_TYPE.OPTIMIZED ? 128 /* TODO: change when power tuning */ : 128,
@@ -48,18 +50,18 @@ export class LambdaStack extends Stack {
         runtime: Runtime.NODEJS_16_X,
         bundling: {
           minify: true,
-          // externalModules: [' '] // modules not to be bundled
+          externalModules: ['aws-sdk', 'crypto'], // modules not to be bundled
+          target: 'node16',
+          keepNames: true,
         },
         // done to be fair because il will use JS_V3 hence the awsSdkConnectionReuse is defaulted to true
         // doing so we can test both scenario without AWS_NODEJS_CONNECTION_REUSE_ENABLED enabled
         awsSdkConnectionReuse: type !== LAMBDA_TYPE.COLD_START_OPTIMIZED,
 
-
         functionName: name,
-        handler: 'index.handler',
-        projectRoot: join(__dirname, `../../src/lambdas/${filename}`),
-        // entry: join(__dirname, `../../backend/src/lambdas/${filename}/index.js`),
+        entry: join(__dirname, `../../src/lambdas/${filename}/index.js`),
         description: 'Optimized lambda function',
+        logRetention: RetentionDays.ONE_MONTH,
         environment,
         role,
       }
@@ -75,7 +77,8 @@ export class LambdaStack extends Stack {
 
       functionName: `${name}`,
       handler: 'index.handler',
-      code: Code.fromAsset(join(__dirname, `../../backend/src/lambdas/${filename}`)),
+      code: Code.fromAsset(join(__dirname, `../../src/lambdas/${filename}`)),
+      logRetention: RetentionDays.ONE_MONTH,
       environment,
       role,
     });

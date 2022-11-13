@@ -28,5 +28,6 @@ const lambdaStackId = `${stackId}-lambda`;
 const lambdaStack = new LambdaStack(app, lambdaStackId, {
   ...baseProps,
   stackName: lambdaStackId,
+  dynamoDBTableName: dynamoDBStack.dynamoDBTable.tableName,
   dynamoDBTableArn: dynamoDBStack.dynamoDBTable.tableArn,
 }, buildConfig);

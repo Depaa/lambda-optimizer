@@ -44,10 +44,23 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 * Use arm64 architecture
 * Use short timeouts is essential at scale, you can also keep track of it using a filter patter on “Task timed out after”. Do not put your timeout too high if possible.
 
-## 4. All together
-### optimized ❌
-### not-optimized ❌
+
+## RESULTS:
+### CODE NOT OPTIMIZED
+* MAX: start: 1.225s
+* LOW: start: 1.079s
+* INIT: start: 1.737s
+
+### CODE OPTIMIZED
+* MAX: start: 
+* LOW: start: 
+* INIT: start: 
+
+### COLD START NOT OPTIMIZED
+* MAX: start: 2.064s
+* LOW: start: 1.649s
 
 
-
-### ✅ 
+### COLD START OPTIMIZED
+* MAX: start: 1.646s
+* LOW: start: 1.433s

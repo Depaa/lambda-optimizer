@@ -1,26 +1,21 @@
-const { DynamoDBClient, PutCommand } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const crypto = require('crypto');
 
+// eslint-disable-next-line no-unused-vars
 const dynamodb = new DynamoDBClient({ region: 'eu-central-1' });
 const LOOP_INDEX = 10;
-const ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
+
+const fibonacci = (n) => {
+  if (n < 2) return 1;
+  return fibonacci(n - 2) + fibonacci(n - 1);
+};
 
 exports.handler = async () => {
   const promises = [];
 
   for (let index = 0; index < LOOP_INDEX; index += 1) {
-    const putCommand = new PutCommand({
-      TableName: process.env.DYNAMODB_TABLE,
-      Item: {
-        id: crypto.randomBytes(20).toString('hex'),
-        test: 'This is a test value',
-        createdAt: new Date().toISOString(),
-        ttl: new Date().getTime() + ONE_DAY_IN_MILLIS,
-      },
-      ConditionExpression: 'attribute_not_exists(id)',
-    });
-    promises.push(dynamodb.send(putCommand));
+    crypto.randomBytes(128).toString('hex');
+    promises.push(new Promise((resolve) => { fibonacci(LOOP_INDEX * 100); resolve(); }));
   }
   await Promise.allSettled(promises);
-  console.info('Logging after resolved all promises');
-}
+};
