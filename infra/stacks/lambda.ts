@@ -46,7 +46,7 @@ export class LambdaStack extends Stack {
       {
         memorySize: type === LAMBDA_TYPE.OPTIMIZED ? 1792 : 128,
         architecture: type === LAMBDA_TYPE.OPTIMIZED ? Architecture.ARM_64 : Architecture.X86_64,
-        timeout: Duration.seconds(5),
+        timeout: Duration.seconds(15),
         runtime: Runtime.NODEJS_16_X,
         bundling: {
           minify: true,
@@ -72,7 +72,7 @@ export class LambdaStack extends Stack {
     return new Function(this, name, {
       memorySize: 128,
       architecture: Architecture.X86_64,
-      timeout: Duration.seconds(5),
+      timeout: Duration.seconds(15),
       runtime: Runtime.NODEJS_16_X,
 
       functionName: `${name}`,
