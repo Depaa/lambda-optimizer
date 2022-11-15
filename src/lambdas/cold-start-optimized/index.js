@@ -9,10 +9,10 @@ const fibonacci = (n) => {
 exports.handler = async () => {
   // eslint-disable-next-line no-unused-vars
   const dynamodb = new DynamoDBClient();
-  const LOOP_INDEX = 10;
+  const LOOP_INDEX = 29;
 
   for (let index = 0; index < LOOP_INDEX; index += 1) {
     crypto.randomBytes(128).toString('hex');
-    fibonacci(LOOP_INDEX * 100);
+    fibonacci(LOOP_INDEX);
   }
 };

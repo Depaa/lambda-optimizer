@@ -3,7 +3,7 @@ const crypto = require('crypto');
 
 // eslint-disable-next-line no-unused-vars
 const dynamodb = new DynamoDBClient({ region: 'eu-central-1' });
-const LOOP_INDEX = 10;
+const LOOP_INDEX = 29;
 
 const fibonacci = (n) => {
   if (n < 2) return 1;
@@ -15,7 +15,7 @@ exports.handler = async () => {
 
   for (let index = 0; index < LOOP_INDEX; index += 1) {
     crypto.randomBytes(128).toString('hex');
-    promises.push(new Promise((resolve) => { fibonacci(LOOP_INDEX * 100); resolve(); }));
+    promises.push(new Promise((resolve) => { fibonacci(LOOP_INDEX); resolve(); }));
   }
   await Promise.allSettled(promises);
 };
