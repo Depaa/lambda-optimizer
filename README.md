@@ -15,7 +15,8 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 ## QUERY RESULTS:
 
-```filter @type="REPORT" 
+```
+filter @type="REPORT"
 | fields @memorySize / 1000000 as memorySize
 | parse @message /^REPORT.*Duration: (?<duration>.*) ms.*/
 | parse @message /^REPORT.*Init Duration: (?<initDuration>.*) ms.*/
@@ -33,4 +34,5 @@ min(initDuration) as minInit,
 max(initDuration) as maxInit,
 pct(initDuration, 90) as p90Init,
 pct(initDuration, 99) as p99Init
-by functionName, memorySize```
+by functionName, memorySize
+```
