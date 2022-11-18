@@ -1,7 +1,7 @@
 import { App, Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Runtime, Function, Code, Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Effect, IRole, Policy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { Charset, NodejsFunction, OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { BuildConfig } from '../lib/common/config.interface';
 import { name } from '../lib/common/utils';
 import { join } from 'path';
@@ -32,26 +32,32 @@ export class LambdaStack extends Stack {
 
     const lambdaRoleDynamoDB = this.createLambdaRole(name(`${id}`), props, buildConfig);
 
-    this.createFunction(name(`${id}-cold-start-not-optimized`), 'cold-start-not-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.COLD_START_NOT_OPTIMIZED, baseEnv);
-    this.createBundleOptimizedFunction(name(`${id}-cold-start-optimized`), 'cold-start-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.COLD_START_OPTIMIZED, baseEnv);
-    this.createBundleOptimizedFunction(name(`${id}-code-not-optimized`), 'code-not-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.CODE_NOT_OPTIMIZED, baseEnv);
-    this.createBundleOptimizedFunction(name(`${id}-code-optimized`), 'code-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.CODE_OPTIMIZED, baseEnv);
+    this.createFunction(name(`${id}-cold-start-not-optimized-18`), 'node18/cold-start-not-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.COLD_START_NOT_OPTIMIZED, Runtime.NODEJS_18_X, baseEnv);
+    this.createBundleOptimizedFunction(name(`${id}-cold-start-optimized-18`), 'node18/cold-start-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.COLD_START_OPTIMIZED, Runtime.NODEJS_18_X, baseEnv);
+    this.createBundleOptimizedFunction(name(`${id}-code-not-optimized-18`), 'node18/code-not-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.CODE_NOT_OPTIMIZED, Runtime.NODEJS_18_X, baseEnv);
+    this.createBundleOptimizedFunction(name(`${id}-code-optimized-18`), 'node18/code-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.CODE_OPTIMIZED, Runtime.NODEJS_18_X, baseEnv);
+    this.createFunction(name(`${id}-not-optimized-18`), 'node18/not-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.NOT_OPTIMIZED, Runtime.NODEJS_18_X, baseEnv);
+    this.createBundleOptimizedFunction(name(`${id}-optimized-18`), 'node18/optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.OPTIMIZED, Runtime.NODEJS_18_X, baseEnv);
 
-    this.createFunction(name(`${id}-not-optimized`), 'not-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.NOT_OPTIMIZED, baseEnv);
-    this.createBundleOptimizedFunction(name(`${id}-optimized`), 'optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.OPTIMIZED, baseEnv);
+    this.createFunction(name(`${id}-cold-start-not-optimized-16`), 'node16/cold-start-not-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.COLD_START_NOT_OPTIMIZED, Runtime.NODEJS_16_X, baseEnv);
+    this.createBundleOptimizedFunction(name(`${id}-cold-start-optimized-16`), 'node16/cold-start-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.COLD_START_OPTIMIZED, Runtime.NODEJS_16_X, baseEnv);
+    this.createBundleOptimizedFunction(name(`${id}-code-not-optimized-16`), 'node16/code-not-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.CODE_NOT_OPTIMIZED, Runtime.NODEJS_16_X, baseEnv);
+    this.createBundleOptimizedFunction(name(`${id}-code-optimized-16`), 'node16/code-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.CODE_OPTIMIZED, Runtime.NODEJS_16_X, baseEnv);
+    this.createFunction(name(`${id}-not-optimized-16`), 'node16/not-optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.NOT_OPTIMIZED, Runtime.NODEJS_16_X, baseEnv);
+    this.createBundleOptimizedFunction(name(`${id}-optimized-16`), 'node16/optimized', lambdaRoleDynamoDB, LAMBDA_TYPE.OPTIMIZED, Runtime.NODEJS_16_X, baseEnv);
   }
 
-  private createBundleOptimizedFunction = (name: string, filename: string, role: IRole, type: LAMBDA_TYPE, environment?: { [key: string]: string; }): Function => {
+  private createBundleOptimizedFunction = (name: string, filename: string, role: IRole, type: LAMBDA_TYPE, runtime: Runtime, environment?: { [key: string]: string; }): Function => {
     return new NodejsFunction(this, name,
       {
         memorySize: type === LAMBDA_TYPE.OPTIMIZED ? 1792 : 128,
         architecture: type === LAMBDA_TYPE.OPTIMIZED ? Architecture.ARM_64 : Architecture.X86_64,
-        timeout: Duration.seconds(15),
-        runtime: Runtime.NODEJS_16_X,
+        timeout: Duration.seconds(30),
+        runtime,
         bundling: {
           minify: true,
-          externalModules: ['aws-sdk', 'crypto'], // modules not to be bundled
-          target: 'node16',
+          externalModules: ['aws-sdk'], // modules not to be bundled
+          target: runtime === Runtime.NODEJS_16_X ? 'node16' : 'node18',
           keepNames: true,
         },
         // done to be fair because il will use JS_V3 hence the awsSdkConnectionReuse is defaulted to true
@@ -68,12 +74,12 @@ export class LambdaStack extends Stack {
     );
   }
 
-  private createFunction = (name: string, filename: string, role: IRole, type: LAMBDA_TYPE, environment?: { [key: string]: string; }): Function => {
+  private createFunction = (name: string, filename: string, role: IRole, type: LAMBDA_TYPE, runtime: Runtime, environment?: { [key: string]: string; }): Function => {
     return new Function(this, name, {
       memorySize: 128,
       architecture: Architecture.X86_64,
-      timeout: Duration.seconds(15),
-      runtime: Runtime.NODEJS_16_X,
+      timeout: Duration.seconds(30),
+      runtime,
 
       functionName: `${name}`,
       handler: 'index.handler',

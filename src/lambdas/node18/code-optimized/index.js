@@ -1,6 +1,8 @@
 // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
-const { DynamoDB } = require('aws-sdk');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 
+// eslint-disable-next-line no-unused-vars
+const dynamodb = new DynamoDBClient({ region: 'eu-central-1' });
 const LOOP_INDEX = 34;
 
 const fibonacci = (n) => {
@@ -11,19 +13,15 @@ const fibonacci = (n) => {
 const sleep = (time) => new Promise((resolve) => { setTimeout(resolve, time); });
 
 exports.handler = async () => {
-  console.time('initDynamo');
-  // eslint-disable-next-line no-unused-vars
-  const dynamodb = new DynamoDB();
-  console.timeEnd('initDynamo');
-
   console.time('fibonacci');
   fibonacci(LOOP_INDEX);
   console.timeEnd('fibonacci');
 
   console.time('total');
+  const promises = [];
   for (let index = 0; index < LOOP_INDEX; index += 1) {
-    // eslint-disable-next-line no-await-in-loop
-    await sleep(100);
+    promises.push(sleep(100));
   }
+  await Promise.all(promises);
   console.timeEnd('total');
 };
