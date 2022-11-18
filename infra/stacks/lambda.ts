@@ -50,9 +50,9 @@ export class LambdaStack extends Stack {
   private createBundleOptimizedFunction = (name: string, filename: string, role: IRole, type: LAMBDA_TYPE, runtime: Runtime, environment?: { [key: string]: string; }): Function => {
     return new NodejsFunction(this, name,
       {
-        memorySize: type === LAMBDA_TYPE.OPTIMIZED ? 1792 : 128,
+        memorySize: type === LAMBDA_TYPE.OPTIMIZED ? 1024 : 128,
         architecture: type === LAMBDA_TYPE.OPTIMIZED ? Architecture.ARM_64 : Architecture.X86_64,
-        timeout: Duration.seconds(30),
+        timeout: Duration.seconds(10),
         runtime,
         bundling: {
           minify: true,
@@ -78,7 +78,7 @@ export class LambdaStack extends Stack {
     return new Function(this, name, {
       memorySize: 128,
       architecture: Architecture.X86_64,
-      timeout: Duration.seconds(30),
+      timeout: Duration.seconds(10),
       runtime,
 
       functionName: `${name}`,
