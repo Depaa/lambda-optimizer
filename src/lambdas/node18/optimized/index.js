@@ -3,7 +3,7 @@ const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 
 // eslint-disable-next-line no-unused-vars
 const dynamodb = new DynamoDBClient({ region: 'eu-central-1' });
-const LOOP_INDEX = 37;
+const LOOP_INDEX = 34;
 
 const fibonacci = (n) => {
   if (n < 2) return 1;

@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-unresolved, import/no-extraneous-dependencies
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 
-const LOOP_INDEX = 37;
+const LOOP_INDEX = 34;
 
 const fibonacci = (n) => {
   if (n < 2) return 1;
