@@ -14,25 +14,43 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
  * `cdk synth`       emits the synthesized CloudFormation template
 
 ## QUERY RESULTS:
-
+### COLD START
 ```
-filter @type="REPORT"
+filter @type="REPORT" 
 | fields @memorySize / 1000000 as memorySize
-| parse @message /^REPORT.*Duration: (?<duration>.*) ms.*/
-| parse @message /^REPORT.*Init Duration: (?<initDuration>.*) ms.*/
-| parse @log /^.*\/aws\/lambda\/(?<functionName>.*)/
+| parse @message /^REPORT.*Duration: (?<duration>.*) ms.*Init Duration: (?<initDuration>.*) ms.*/
+| parse @log /^.*\/aws\/lambda\/dev-lambda-optimizer-lambda-(?<functionName>.*)/
+| stats 
+count(initDuration) as countInit,
+ceil(avg(initDuration)) as avgInit, 
+min(initDuration) as minInit,
+max(initDuration) as maxInit
+by functionName, memorySize
+```
+
+### CODE
+```
+filter @type="REPORT" 
+| fields @memorySize / 1000000 as memorySize
+| parse @message /^REPORT.*Duration: (?<duration>.*) ms.*Billed.*/
+| parse @log /^.*\/aws\/lambda\/dev-lambda-optimizer-lambda-(?<functionName>.*)/
 | stats 
 count(duration) as countInvoke,
-count(initDuration) as countInit,
-avg(duration) as avg, 
+ceil(avg(duration)) as avg, 
 min(duration) as min,
-max(duration) as max,
-pct(duration, 90) as p90,
-pct(duration, 99) as p99,
-avg(initDuration) as avgInit, 
-min(initDuration) as minInit,
-max(initDuration) as maxInit,
-pct(initDuration, 90) as p90Init,
-pct(initDuration, 99) as p99Init
+max(duration) as max
+by functionName, memorySize
+```
+### OPTIMIZE
+```
+filter @type="REPORT" 
+| fields @memorySize / 1000000 as memorySize
+| parse @message /^REPORT.*Duration: (?<duration>.*) ms.*Billed.*/
+| parse @log /^.*\/aws\/lambda\/dev-lambda-optimizer-lambda-(?<functionName>.*)/
+| stats 
+count(duration) as countInvoke,
+ceil(avg(duration)) as avg, 
+min(duration) as min,
+max(duration) as max
 by functionName, memorySize
 ```
